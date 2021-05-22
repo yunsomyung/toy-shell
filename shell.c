@@ -19,12 +19,13 @@ int main(void)
     
     char hostname[LEN_HOSTNAME + 1];
     memset(hostname, 0x00, sizeof(hostname));
+    gethostname(hostname, LEN_HOSTNAME);
 
     while (true) {
         char *s;
         int len;
         
-        printf("%s $ ", getpwuid(getuid())->pw_name);
+        printf("%s@%s $ ", getpwuid(getuid())->pw_name, hostname);
         s = fgets(command, MAX_LEN_LINE, stdin);
         if (s == NULL) {
             fprintf(stderr, "fgets failed\n");
