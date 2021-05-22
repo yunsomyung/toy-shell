@@ -9,6 +9,7 @@
 
 #define MAX_LEN_LINE    100
 #define LEN_HOSTNAME 	30
+#define LEN_CWD		1024
 
 int main(void)
 {
@@ -21,11 +22,14 @@ int main(void)
     memset(hostname, 0x00, sizeof(hostname));
     gethostname(hostname, LEN_HOSTNAME);
 
+    char cwd[LEN_CWD + 1];
+    getcwd(cwd, LEN_CWD);
+
     while (true) {
         char *s;
         int len;
         
-        printf("%s@%s $ ", getpwuid(getuid())->pw_name, hostname);
+        printf("%s@%s:%s$ ", getpwuid(getuid())->pw_name, hostname, cwd);
         s = fgets(command, MAX_LEN_LINE, stdin);
         if (s == NULL) {
             fprintf(stderr, "fgets failed\n");
