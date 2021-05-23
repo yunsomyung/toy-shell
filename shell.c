@@ -10,6 +10,7 @@
 #define MAX_LEN_LINE    100
 #define LEN_HOSTNAME 	30
 #define LEN_CWD		1024
+#define LEN_PATH	1024
 
 int main(void)
 {
@@ -24,6 +25,11 @@ int main(void)
 
     char cwd[LEN_CWD + 1];
     getcwd(cwd, LEN_CWD);
+
+    char path[LEN_PATH];
+    char *cut_path;
+    char new_path[LEN_PATH];    
+    char command_real[MAX_LEN_LINE];
 
     while (true) {
         char *s;
@@ -47,7 +53,7 @@ int main(void)
         }
 	
 	printf("%d\n", len);
-        printf("[%s]\n", command);
+	printf("[%s]\n", command);
 
         pid = fork();
         if (pid < 0) {
@@ -65,11 +71,22 @@ int main(void)
             }
         }
         else {  /* child */
-            ret = execve(args[0], args, NULL);
-	    if (ret < 0) {
-                fprintf(stderr, "execve failed\n");   
-                return 1;
-            }
+		ret = execve(args[0], args, NULL);
+		if (ret < 0) {
+			strcpy(command_real, command);
+			strcpy(path, getenv("PATH"));
+			cut_path = strtok(path, ":");
+      			while(cut_path != NULL) {
+				strcpy(new_path, cut_path);
+				strcat(new_path, "/");
+				strcat(new_path, command_real);
+				strcpy(command, new_path);
+				ret = execve(args[0], args, NULL);
+				cut_path = strtok(NULL, ":");
+			}
+                	fprintf(stderr, "execve failed\n");   
+                	return 1;
+            	}
         } 
     }
     return 0;
